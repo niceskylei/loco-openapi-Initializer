@@ -1,4 +1,5 @@
 use async_trait::async_trait;
+use loco_rs::auth::openapi::{set_jwt_location_ctx, SecurityAddon};
 use loco_rs::{
     app::{AppContext, Hooks, Initializer},
     bgworker::{BackgroundWorker, Queue},
@@ -7,6 +8,7 @@ use loco_rs::{
     controller::AppRoutes,
     db::{self, truncate_table},
     environment::Environment,
+    prelude::{utoipa, OpenApi},
     task::Tasks,
     Result,
 };
@@ -66,5 +68,20 @@ impl Hooks for App {
         db::seed::<users::ActiveModel>(&ctx.db, &base.join("users.yaml").display().to_string())
             .await?;
         Ok(())
+    }
+
+    fn inital_openapi_spec(ctx: &AppContext) -> utoipa::openapi::OpenApi {
+        set_jwt_location_ctx(ctx);
+
+        #[derive(OpenApi)]
+        #[openapi(
+                modifiers(&SecurityAddon),
+                info(
+                    title = "Loco Demo",
+                    description = "This app is a kitchensink for various capabilities and examples of the [Loco](https://loco.rs) project."
+                )
+            )]
+        struct ApiDoc;
+        ApiDoc::openapi()
     }
 }
