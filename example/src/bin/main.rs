@@ -1,4 +1,4 @@
-use loco_openapi::app::App;
+use loco_openapi_example::app::App;
 use loco_rs::cli;
 use migration::Migrator;
 

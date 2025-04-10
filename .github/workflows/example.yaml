@@ -1,4 +1,4 @@
-name: CI
+name: example
 on:
   push:
     branches:
@@ -9,6 +9,7 @@ on:
 env:
   RUST_TOOLCHAIN: stable
   TOOLCHAIN_PROFILE: minimal
+  CARGO_MANIFEST_DIR: ./example
 
 jobs:
   rustfmt:
@@ -58,7 +59,7 @@ jobs:
 
     permissions:
       contents: read
-    
+
     services:
       redis:
         image: redis
@@ -99,4 +100,3 @@ jobs:
         env:
           REDIS_URL: redis://localhost:${{job.services.redis.ports[6379]}}
           DATABASE_URL: postgres://postgres:postgres@localhost:5432/postgres_test
-          
