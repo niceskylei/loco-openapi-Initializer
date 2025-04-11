@@ -35,10 +35,10 @@ where
     T: Clone + Send + Sync + 'static,
 {
     if let Some(json_url) = json_url {
-        app = app.route(&json_url, get(openapi_spec_json));
+        app = app.route(json_url, get(openapi_spec_json));
     }
     if let Some(yaml_url) = yaml_url {
-        app = app.route(&yaml_url, get(openapi_spec_yaml));
+        app = app.route(yaml_url, get(openapi_spec_yaml));
     }
     app
 }

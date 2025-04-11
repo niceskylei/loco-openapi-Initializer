@@ -3,9 +3,9 @@ use std::sync::OnceLock;
 use loco_rs::{app::AppContext, Error};
 use serde::{Deserialize, Serialize};
 
-static OPENAPI_CONFIG: OnceLock<Option<OpenAPIType>> = OnceLock::new();
+static OPENAPI_CONFIG: OnceLock<Option<OpenAPIConfig>> = OnceLock::new();
 
-pub fn set_openapi_config(ctx: &AppContext) -> Result<Option<&OpenAPIType>, Error> {
+pub fn set_openapi_config(ctx: &AppContext) -> Result<Option<&OpenAPIConfig>, Error> {
     let json = ctx
         .config
         .initializers
@@ -13,16 +13,60 @@ pub fn set_openapi_config(ctx: &AppContext) -> Result<Option<&OpenAPIType>, Erro
         .and_then(|m| m.get("openapi"))
         .cloned()
         .unwrap_or_default();
-    let config: Option<OpenAPIType> = serde_json::from_value(json)?;
+    let config: Option<OpenAPIConfig> = serde_json::from_value(json)?;
 
     Ok(OPENAPI_CONFIG.get_or_init(|| config).as_ref())
 }
 
-pub fn get_openapi_config() -> Option<&'static OpenAPIType> {
+pub fn get_openapi_config() -> Option<&'static OpenAPIConfig> {
     OPENAPI_CONFIG.get().unwrap_or(&None).as_ref()
 }
 
 /// `OpenAPI` configuration
+/// Example:
+/// ```yaml
+/// openapi:
+///   redoc:
+///     url: /redoc
+///   swagger:
+///     url: /swagger
+///     spec_json_url: /api-docs/openapi.json
+///   scalar:
+///     url: /scalar
+/// ```
+#[derive(Debug, Clone, Deserialize, Serialize)]
+pub struct OpenAPIConfig {
+    /// Redoc configuration
+    /// Example:
+    /// ```yaml
+    /// openapi:
+    ///   redoc:
+    ///     url: /redoc
+    /// ```
+    #[cfg(feature = "redoc")]
+    pub redoc: Option<OpenAPIType>,
+    /// Scalar configuration
+    /// Example:
+    /// ```yaml
+    /// openapi:
+    ///   scalar:
+    ///     url: /scalar
+    /// ```
+    #[cfg(feature = "scalar")]
+    pub scalar: Option<OpenAPIType>,
+    /// Swagger configuration
+    /// Example:
+    /// ```yaml
+    /// openapi:
+    ///   swagger:
+    ///     url: /swagger
+    ///     spec_json_url: /openapi.json
+    /// ```
+    #[cfg(feature = "swagger")]
+    pub swagger: Option<OpenAPIType>,
+}
+
+/// `OpenAPI` configuration types
 #[derive(Debug, Clone, Deserialize, Serialize)]
 pub enum OpenAPIType {
     /// Redoc configuration

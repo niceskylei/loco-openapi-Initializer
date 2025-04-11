@@ -75,47 +75,46 @@ impl<F: Fn(&AppContext) -> OpenApi + Send + Sync + 'static> Initializer
         let (_, open_api_spec) = api_router.split_for_parts();
         openapi::set_openapi_spec(open_api_spec);
 
+        let open_api_config = if let Some(open_api_config) = get_openapi_config() {
+            open_api_config
+        } else {
+            return Ok(router);
+        };
+
         // Serve the OpenAPI spec using the enabled OpenAPI visualizers
         #[cfg(feature = "redoc")]
+        if let Some(OpenAPIType::Redoc {
+            url,
+            spec_json_url,
+            spec_yaml_url,
+        }) = &open_api_config.redoc
         {
-            if let Some(OpenAPIType::Redoc {
-                url,
-                spec_json_url,
-                spec_yaml_url,
-            }) = get_openapi_config()
-            {
-                router = router.merge(Redoc::with_url(url, openapi::get_openapi_spec().clone()));
-                router = openapi::add_openapi_endpoints(router, spec_json_url, spec_yaml_url);
-            }
+            router = router.merge(Redoc::with_url(url, openapi::get_openapi_spec().clone()));
+            router = openapi::add_openapi_endpoints(router, spec_json_url, spec_yaml_url);
         }
 
         #[cfg(feature = "scalar")]
+        if let Some(OpenAPIType::Scalar {
+            url,
+            spec_json_url,
+            spec_yaml_url,
+        }) = &open_api_config.scalar
         {
-            if let Some(OpenAPIType::Scalar {
-                url,
-                spec_json_url,
-                spec_yaml_url,
-            }) = get_openapi_config()
-            {
-                router = router.merge(Scalar::with_url(url, openapi::get_openapi_spec().clone()));
-                router = openapi::add_openapi_endpoints(router, spec_json_url, spec_yaml_url);
-            }
+            router = router.merge(Scalar::with_url(url, openapi::get_openapi_spec().clone()));
+            router = openapi::add_openapi_endpoints(router, spec_json_url, spec_yaml_url);
         }
 
         #[cfg(feature = "swagger")]
+        if let Some(OpenAPIType::Swagger {
+            url,
+            spec_json_url,
+            spec_yaml_url,
+        }) = &open_api_config.swagger
         {
-            if let Some(OpenAPIType::Swagger {
-                url,
-                spec_json_url,
-                spec_yaml_url,
-            }) = get_openapi_config()
-            {
-                router = router.merge(
-                    SwaggerUi::new(url)
-                        .url(spec_json_url.clone(), openapi::get_openapi_spec().clone()),
-                );
-                router = openapi::add_openapi_endpoints(router, &None, spec_yaml_url);
-            }
+            router = router.merge(
+                SwaggerUi::new(url).url(spec_json_url.clone(), openapi::get_openapi_spec().clone()),
+            );
+            router = openapi::add_openapi_endpoints(router, &None, spec_yaml_url);
         }
 
         Ok(router)
