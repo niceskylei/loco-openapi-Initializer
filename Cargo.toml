@@ -10,13 +10,15 @@ path = "src/lib.rs"
 
 [features]
 full = ["swagger", "redoc", "scalar"]
-swagger = ["dep:utoipa", "dep:utoipa-axum", "dep:utoipa-swagger-ui"]
-redoc = ["dep:utoipa", "dep:utoipa-axum", "dep:utoipa-redoc"]
-scalar = ["dep:utoipa", "dep:utoipa-axum", "dep:utoipa-scalar"]
+swagger = ["dep:utoipa-swagger-ui"]
+redoc = ["dep:utoipa-redoc"]
+scalar = ["dep:utoipa-scalar"]
 
 
 [dependencies]
-loco-rs = { version = "*", git = "https://github.com/NexVeridian/loco.git", branch = "OpenAPI-integration" }
+loco-rs = { version = "*", features = [
+    "all_openapi",
+], path = "/Users/elijahmcmorris/Desktop/Stuff/Programing/loco" }
 
 serde = { version = "1", features = ["derive"] }
 serde_json = { version = "1" }
@@ -24,8 +26,8 @@ async-trait = { version = "0.1" }
 axum = { version = "0.8.1" }
 
 # OpenAPI
-utoipa = { version = "5.0.0", features = ["yaml"], optional = true }
-utoipa-axum = { version = "0.2.0", optional = true }
+utoipa = { version = "5.0.0", features = ["yaml"] }
+utoipa-axum = { version = "0.2.0" }
 utoipa-swagger-ui = { version = "9.0.0", features = [
     "axum",
     "vendored",
