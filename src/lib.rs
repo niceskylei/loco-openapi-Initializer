@@ -30,9 +30,10 @@ impl Initializer for OpenapiInitializer {
         };
 
         let mut api_router: OpenApiRouter<AppContext> = OpenApiRouter::new();
+
         for route in list_routes {
             match route.method {
-                LocoMethodRouter::Axum(_) => return Ok(router),
+                LocoMethodRouter::Axum(_) => continue,
                 LocoMethodRouter::Utoipa(method) => {
                     api_router = api_router.routes(method.with_state(ctx.clone()))
                 }

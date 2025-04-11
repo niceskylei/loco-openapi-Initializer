@@ -25,37 +25,15 @@ pub fn get_openapi_config() -> Option<&'static OpenAPIType> {
 /// `OpenAPI` configuration
 #[cfg(any(feature = "swagger", feature = "redoc", feature = "scalar"))]
 #[derive(Debug, Clone, Deserialize, Serialize)]
-pub struct OpenAPI {
+pub enum OpenAPIType {
     /// Redoc configuration
     /// Example:
     /// ```yaml
-    /// redoc:
-    ///   !Redoc
+    /// openapi:
+    ///   redoc:
     ///     url: /redoc
     /// ```
-    pub redoc: Option<OpenAPIType>,
-    /// Scalar configuration
-    /// Example:
-    /// ```yaml
-    /// scalar:
-    ///   !Scalar
-    ///     url: /scalar
-    /// ```
-    pub scalar: Option<OpenAPIType>,
-    /// Swagger configuration
-    /// Example:
-    /// ```yaml
-    /// swagger:
-    ///  !Swagger
-    ///    url: /swagger
-    ///    spec_json_url: /openapi.json
-    /// ```
-    pub swagger: Option<OpenAPIType>,
-}
-
-#[cfg(any(feature = "swagger", feature = "redoc", feature = "scalar"))]
-#[derive(Debug, Clone, Deserialize, Serialize)]
-pub enum OpenAPIType {
+    #[serde(rename = "redoc")]
     Redoc {
         /// URL for where to host the redoc `OpenAPI` spec, example: /redoc
         url: String,
@@ -64,14 +42,31 @@ pub enum OpenAPIType {
         /// URL for openapi.yaml, for example: /openapi.yaml
         spec_yaml_url: Option<String>,
     },
+    /// Scalar configuration
+    /// Example:
+    /// ```yaml
+    /// openapi:
+    ///   scalar:
+    ///     url: /scalar
+    /// ```
+    #[serde(rename = "scalar")]
     Scalar {
-        /// URL for where to host the swagger `OpenAPI` spec, example: /scalar
+        /// URL for where to host the scalar `OpenAPI` spec, example: /scalar
         url: String,
         /// URL for openapi.json, for example: /openapi.json
         spec_json_url: Option<String>,
         /// URL for openapi.yaml, for example: /openapi.yaml
         spec_yaml_url: Option<String>,
     },
+    /// Swagger configuration
+    /// Example:
+    /// ```yaml
+    /// openapi:
+    ///   swagger:
+    ///     url: /swagger
+    ///     spec_json_url: /openapi.json
+    /// ```
+    #[serde(rename = "swagger")]
     Swagger {
         /// URL for where to host the swagger `OpenAPI` spec, example:
         /// /swagger-ui
