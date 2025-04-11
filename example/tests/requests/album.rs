@@ -1,4 +1,4 @@
-use loco_openapi::app::App;
+use loco_openapi_example::app::App;
 use loco_rs::testing::prelude::*;
 use serial_test::serial;
 
@@ -14,4 +14,3 @@ async fn can_get_albums() {
     })
     .await;
 }
-

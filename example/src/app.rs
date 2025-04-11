@@ -1,16 +1,16 @@
 use async_trait::async_trait;
-use loco_rs::auth::openapi::{set_jwt_location_ctx, SecurityAddon};
+use loco_rs::auth::openapi::{SecurityAddon, set_jwt_location_ctx};
 use loco_rs::{
+    Result,
     app::{AppContext, Hooks, Initializer},
     bgworker::{BackgroundWorker, Queue},
-    boot::{create_app, BootResult, StartMode},
+    boot::{BootResult, StartMode, create_app},
     config::Config,
     controller::AppRoutes,
     db::{self, truncate_table},
     environment::Environment,
-    prelude::{utoipa, OpenApi},
+    prelude::{OpenApi, utoipa},
     task::Tasks,
-    Result,
 };
 use migration::Migrator;
 use std::path::Path;
@@ -44,7 +44,7 @@ impl Hooks for App {
     }
 
     async fn initializers(_ctx: &AppContext) -> Result<Vec<Box<dyn Initializer>>> {
-        Ok(vec![])
+        Ok(vec![Box::new(loco_openapi::OpenapiInitializer)])
     }
 
     fn routes(_ctx: &AppContext) -> AppRoutes {
