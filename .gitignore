@@ -5,3 +5,5 @@ target/
 
 # include cargo lock
 !Cargo.lock
+example/loco-openapi_test.sqlite-shm
+example/loco-openapi_test.sqlite-wal

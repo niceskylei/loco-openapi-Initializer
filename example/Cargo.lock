@@ -2405,7 +2405,7 @@ checksum = "9374ef4228402d4b7e403e5838cb880d9ee663314b0a900d5a6aabf0c213552e"
 
 [[package]]
 name = "loco-gen"
-version = "0.14.1"
+version = "0.15.0"
 dependencies = [
  "chrono",
  "clap",
@@ -2435,6 +2435,8 @@ dependencies = [
  "utoipa",
  "utoipa-axum",
  "utoipa-redoc",
+ "utoipa-scalar",
+ "utoipa-swagger-ui",
 ]
 
 [[package]]
@@ -2464,7 +2466,7 @@ dependencies = [
 
 [[package]]
 name = "loco-rs"
-version = "0.14.1"
+version = "0.15.0"
 dependencies = [
  "argon2",
  "async-trait",
@@ -2483,7 +2485,6 @@ dependencies = [
  "duct",
  "duct_sh",
  "english-to-cron",
- "fs-err",
  "futures-util",
  "heck 0.4.1",
  "hyper",
@@ -2492,7 +2493,6 @@ dependencies = [
  "jsonwebtoken",
  "lettre",
  "loco-gen",
- "mime",
  "moka",
  "opendal",
  "rand",
@@ -3572,7 +3572,8 @@ dependencies = [
 [[package]]
 name = "rrgen"
 version = "0.5.6"
-source = "git+https://github.com/jondot/rrgen#299f9d2637947c7e7a54c496300d6df746f14f00"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "ee7a7ede035354391a37e42aa4935b3d8921f0ded896d2ce44bb1a3b6dd76bab"
 dependencies = [
  "cruet 0.13.3",
  "fs-err",
