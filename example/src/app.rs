@@ -1,5 +1,5 @@
 use async_trait::async_trait;
-use loco_rs::auth::openapi::{SecurityAddon, set_jwt_location_ctx};
+use loco_openapi::auth::{SecurityAddon, set_jwt_location_ctx};
 use loco_rs::{
     Result,
     app::{AppContext, Hooks, Initializer},

@@ -12,6 +12,7 @@ use utoipa_swagger_ui::SwaggerUi;
 
 use config::{get_openapi_config, set_openapi_config, OpenAPIType};
 
+pub mod auth;
 pub mod config;
 pub mod openapi;
 
