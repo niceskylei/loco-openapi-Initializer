@@ -1,6 +1,7 @@
 use async_trait::async_trait;
 use axum::Router as AxumRouter;
 use loco_rs::{controller::routes::LocoMethodRouter, prelude::*};
+use utoipa::openapi::OpenApi;
 use utoipa_axum::router::{OpenApiRouter, UtoipaMethodRouterExt};
 #[cfg(feature = "redoc")]
 use utoipa_redoc::{Redoc, Servable};
@@ -14,10 +15,33 @@ use config::{get_openapi_config, set_openapi_config, OpenAPIType};
 pub mod config;
 pub mod openapi;
 
-pub struct OpenapiInitializer;
+/// Loco initializer for OpenAPI with custom initial spec setup.
+pub struct OpenapiInitializerWithSetup<F: Fn(&AppContext) -> OpenApi + Send + Sync + 'static> {
+    /// Custom setup for the initial OpenAPI spec, if any.
+    initial_spec: Option<F>,
+}
+
+/// Loco initializer for OpenAPI without custom setup.
+impl<F: Fn(&AppContext) -> OpenApi + Send + Sync + 'static> OpenapiInitializerWithSetup<F> {
+    #[inline(always)]
+    #[must_use]
+    pub fn new(initial_spec: F) -> Self {
+        Self {
+            initial_spec: Some(initial_spec),
+        }
+    }
+}
+
+impl Default for OpenapiInitializerWithSetup<fn(&AppContext) -> OpenApi> {
+    fn default() -> Self {
+        Self { initial_spec: None }
+    }
+}
 
 #[async_trait]
-impl Initializer for OpenapiInitializer {
+impl<F: Fn(&AppContext) -> OpenApi + Send + Sync + 'static> Initializer
+    for OpenapiInitializerWithSetup<F>
+{
     fn name(&self) -> String {
         "openapi".to_string()
     }
@@ -29,7 +53,12 @@ impl Initializer for OpenapiInitializer {
             _ => return Ok(router),
         };
 
-        let mut api_router: OpenApiRouter<AppContext> = OpenApiRouter::new();
+        let mut api_router: OpenApiRouter<AppContext> =
+            if let Some(ref custom_spec_fn) = self.initial_spec {
+                OpenApiRouter::with_openapi(custom_spec_fn(ctx))
+            } else {
+                OpenApiRouter::new()
+            };
 
         for route in list_routes {
             match route.method {
