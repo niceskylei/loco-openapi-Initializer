@@ -17,8 +17,9 @@ scalar = ["dep:utoipa-scalar"]
 
 [dependencies]
 loco-rs = { version = "*", features = [
-    "all_openapi",
-], path = "/Users/elijahmcmorris/Desktop/Stuff/Programing/loco" }
+    "openapi",
+], git = "https://github.com/NexVeridian/loco", branch = "all_openapi" }
+
 
 serde = { version = "1", features = ["derive"] }
 serde_json = { version = "1" }

@@ -12,8 +12,8 @@ license = "MIT OR Apache-2.0"
 
 [workspace.dependencies]
 loco-rs = { version = "*", features = [
-    "all_openapi",
-], path = "/Users/elijahmcmorris/Desktop/Stuff/Programing/loco" }
+    "openapi",
+], git = "https://github.com/NexVeridian/loco", branch = "all_openapi" }
 
 [dependencies]
 loco-openapi = { path = "../", features = ["full"] }
