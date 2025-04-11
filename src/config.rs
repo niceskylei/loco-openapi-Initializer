@@ -1,4 +1,26 @@
+use std::sync::OnceLock;
+
+use loco_rs::{app::AppContext, Error};
 use serde::{Deserialize, Serialize};
+
+static OPENAPI_CONFIG: OnceLock<Option<OpenAPIType>> = OnceLock::new();
+
+pub fn set_openapi_config(ctx: &AppContext) -> Result<Option<&OpenAPIType>, Error> {
+    let json = ctx
+        .config
+        .initializers
+        .as_ref()
+        .and_then(|m| m.get("openapi"))
+        .cloned()
+        .unwrap_or_default();
+    let config: Option<OpenAPIType> = serde_json::from_value(json)?;
+
+    Ok(OPENAPI_CONFIG.get_or_init(|| config).as_ref())
+}
+
+pub fn get_openapi_config() -> Option<&'static OpenAPIType> {
+    OPENAPI_CONFIG.get().unwrap_or(&None).as_ref()
+}
 
 /// `OpenAPI` configuration
 #[cfg(any(feature = "swagger", feature = "redoc", feature = "scalar"))]

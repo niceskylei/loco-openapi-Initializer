@@ -9,6 +9,8 @@ use utoipa_scalar::{Scalar, Servable as ScalarServable};
 #[cfg(feature = "swagger")]
 use utoipa_swagger_ui::SwaggerUi;
 
+use config::{get_openapi_config, set_openapi_config, OpenAPIType};
+
 pub mod config;
 pub mod openapi;
 
@@ -20,7 +22,8 @@ impl Initializer for OpenapiInitializer {
         "openapi".to_string()
     }
 
-    async fn after_routes(&self, router: AxumRouter, ctx: &AppContext) -> Result<AxumRouter> {
+    async fn after_routes(&self, mut router: AxumRouter, ctx: &AppContext) -> Result<AxumRouter> {
+        set_openapi_config(ctx)?;
         let list_routes = match ctx.app_routes.as_ref() {
             Some(routes) => routes.collect(),
             _ => return Ok(router),
@@ -47,7 +50,7 @@ impl Initializer for OpenapiInitializer {
                 url,
                 spec_json_url,
                 spec_yaml_url,
-            }) = ctx.config.server.openapi.redoc.clone()
+            }) = get_openapi_config()
             {
                 router = router.merge(Redoc::with_url(url, openapi::get_openapi_spec().clone()));
                 router = openapi::add_openapi_endpoints(router, spec_json_url, spec_yaml_url);
@@ -60,7 +63,7 @@ impl Initializer for OpenapiInitializer {
                 url,
                 spec_json_url,
                 spec_yaml_url,
-            }) = ctx.config.server.openapi.scalar.clone()
+            }) = get_openapi_config()
             {
                 router = router.merge(Scalar::with_url(url, openapi::get_openapi_spec().clone()));
                 router = openapi::add_openapi_endpoints(router, spec_json_url, spec_yaml_url);
@@ -73,12 +76,13 @@ impl Initializer for OpenapiInitializer {
                 url,
                 spec_json_url,
                 spec_yaml_url,
-            }) = ctx.config.server.openapi.swagger.clone()
+            }) = get_openapi_config()
             {
                 router = router.merge(
-                    SwaggerUi::new(url).url(spec_json_url, openapi::get_openapi_spec().clone()),
+                    SwaggerUi::new(url)
+                        .url(spec_json_url.clone(), openapi::get_openapi_spec().clone()),
                 );
-                router = openapi::add_openapi_endpoints(router, None, spec_yaml_url);
+                router = openapi::add_openapi_endpoints(router, &None, spec_yaml_url);
             }
         }
 

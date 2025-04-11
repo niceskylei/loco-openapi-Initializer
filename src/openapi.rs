@@ -28,8 +28,8 @@ pub async fn openapi_spec_yaml() -> Result<Response> {
 /// Adds the `OpenAPI` endpoints the app router
 pub fn add_openapi_endpoints<T>(
     mut app: AxumRouter<T>,
-    json_url: Option<String>,
-    yaml_url: Option<String>,
+    json_url: &Option<String>,
+    yaml_url: &Option<String>,
 ) -> AxumRouter<T>
 where
     T: Clone + Send + Sync + 'static,
