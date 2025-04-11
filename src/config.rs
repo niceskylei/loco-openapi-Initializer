@@ -27,12 +27,20 @@ pub fn get_openapi_config() -> Option<&'static OpenAPIConfig> {
 /// ```yaml
 /// openapi:
 ///   redoc:
-///     url: /redoc
-///   swagger:
-///     url: /swagger
-///     spec_json_url: /api-docs/openapi.json
+///     redoc:
+///       url: /redoc
+///       # spec_json_url: /redoc/openapi.json
+///       # spec_yaml_url: /redoc/openapi.yaml
 ///   scalar:
-///     url: /scalar
+///     scalar:
+///       url: /scalar
+///       # spec_json_url: /scalar/openapi.json
+///       # spec_yaml_url: /scalar/openapi.yaml
+///   swagger:
+///     swagger:
+///       url: /swagger
+///       spec_json_url: /api-docs/openapi.json
+///       # spec_yaml_url: /api-docs/openapi.yaml
 /// ```
 #[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct OpenAPIConfig {
@@ -41,7 +49,8 @@ pub struct OpenAPIConfig {
     /// ```yaml
     /// openapi:
     ///   redoc:
-    ///     url: /redoc
+    ///     redoc:
+    ///       url: /redoc
     /// ```
     #[cfg(feature = "redoc")]
     pub redoc: Option<OpenAPIType>,
@@ -50,7 +59,8 @@ pub struct OpenAPIConfig {
     /// ```yaml
     /// openapi:
     ///   scalar:
-    ///     url: /scalar
+    ///     scalar:
+    ///       url: /scalar
     /// ```
     #[cfg(feature = "scalar")]
     pub scalar: Option<OpenAPIType>,
@@ -59,8 +69,9 @@ pub struct OpenAPIConfig {
     /// ```yaml
     /// openapi:
     ///   swagger:
-    ///     url: /swagger
-    ///     spec_json_url: /openapi.json
+    ///     swagger:
+    ///       url: /swagger
+    ///       spec_json_url: /openapi.json
     /// ```
     #[cfg(feature = "swagger")]
     pub swagger: Option<OpenAPIType>,
@@ -74,7 +85,8 @@ pub enum OpenAPIType {
     /// ```yaml
     /// openapi:
     ///   redoc:
-    ///     url: /redoc
+    ///     redoc:
+    ///       url: /redoc
     /// ```
     #[cfg(feature = "redoc")]
     #[serde(rename = "redoc")]
@@ -91,7 +103,8 @@ pub enum OpenAPIType {
     /// ```yaml
     /// openapi:
     ///   scalar:
-    ///     url: /scalar
+    ///     scalar:
+    ///       url: /scalar
     /// ```
     #[cfg(feature = "scalar")]
     #[serde(rename = "scalar")]
@@ -108,8 +121,9 @@ pub enum OpenAPIType {
     /// ```yaml
     /// openapi:
     ///   swagger:
-    ///     url: /swagger
-    ///     spec_json_url: /openapi.json
+    ///     swagger:
+    ///       url: /swagger
+    ///       spec_json_url: /openapi.json
     /// ```
     #[cfg(feature = "swagger")]
     #[serde(rename = "swagger")]
