@@ -23,7 +23,6 @@ pub fn get_openapi_config() -> Option<&'static OpenAPIType> {
 }
 
 /// `OpenAPI` configuration
-#[cfg(any(feature = "swagger", feature = "redoc", feature = "scalar"))]
 #[derive(Debug, Clone, Deserialize, Serialize)]
 pub enum OpenAPIType {
     /// Redoc configuration
@@ -33,6 +32,7 @@ pub enum OpenAPIType {
     ///   redoc:
     ///     url: /redoc
     /// ```
+    #[cfg(feature = "redoc")]
     #[serde(rename = "redoc")]
     Redoc {
         /// URL for where to host the redoc `OpenAPI` spec, example: /redoc
@@ -49,6 +49,7 @@ pub enum OpenAPIType {
     ///   scalar:
     ///     url: /scalar
     /// ```
+    #[cfg(feature = "scalar")]
     #[serde(rename = "scalar")]
     Scalar {
         /// URL for where to host the scalar `OpenAPI` spec, example: /scalar
@@ -66,6 +67,7 @@ pub enum OpenAPIType {
     ///     url: /swagger
     ///     spec_json_url: /openapi.json
     /// ```
+    #[cfg(feature = "swagger")]
     #[serde(rename = "swagger")]
     Swagger {
         /// URL for where to host the swagger `OpenAPI` spec, example:
