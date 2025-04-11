@@ -24,10 +24,6 @@ server:
   host: http://localhost
   # Out of the box middleware configuration. to disable middleware you can changed the `enable` field to `false` of comment the middleware block
   middlewares:
-  openapi:
-    scalar:
-      !Scalar
-        url: /scalar
 
 # Worker Configuration
 workers:
@@ -64,10 +60,13 @@ mailer:
 #        ... other fields
 initializers:
   openapi:
+    scalar:
+      url: /scalar
     redoc:
-      url: "/redoc"
-      spec_json_url: "/openapi.json"
-
+      url: /redoc
+    swagger:
+      url: /swagger
+      spec_json_url: /api-docs/openapi.json
 
 # Database Configuration
 database:

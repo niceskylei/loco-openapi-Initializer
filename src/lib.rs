@@ -15,6 +15,7 @@ use config::{get_openapi_config, set_openapi_config, OpenAPIType};
 pub mod auth;
 pub mod config;
 pub mod openapi;
+pub mod prelude;
 
 /// Loco initializer for OpenAPI with custom initial spec setup.
 pub struct OpenapiInitializerWithSetup<F: Fn(&AppContext) -> OpenApi + Send + Sync + 'static> {

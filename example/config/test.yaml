@@ -21,10 +21,6 @@ server:
   # The UI hostname or IP address that mailers will point to.
   host: http://localhost
   # Out of the box middleware configuration. to disable middleware you can changed the `enable` field to `false` of comment the middleware block
-  openapi:
-    scalar:
-      !Scalar
-        url: /scalar
 
 # Worker Configuration
 workers:
@@ -61,8 +57,8 @@ mailer:
 #        ... other fields
 initializers:
   openapi:
-    redoc:
-      url: "/redoc"
+    scalar:
+      url: "/scalar"
       spec_json_url: "/openapi.json"
 
 # Database Configuration
