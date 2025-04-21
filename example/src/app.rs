@@ -44,20 +44,23 @@ impl Hooks for App {
 
     async fn initializers(_ctx: &AppContext) -> Result<Vec<Box<dyn Initializer>>> {
         Ok(vec![Box::new(
-            loco_openapi::OpenapiInitializerWithSetup::new(|ctx| {
-                #[derive(OpenApi)]
-                #[openapi(
+            loco_openapi::OpenapiInitializerWithSetup::new(
+                |ctx| {
+                    #[derive(OpenApi)]
+                    #[openapi(
                         modifiers(&SecurityAddon),
                         info(
                             title = "Loco Demo",
                             description = "This app is a kitchensink for various capabilities and examples of the [Loco](https://loco.rs) project."
                         )
                     )]
-                struct ApiDoc;
-                set_jwt_location_ctx(ctx);
+                    struct ApiDoc;
+                    set_jwt_location_ctx(ctx);
 
-                ApiDoc::openapi()
-            }),
+                    ApiDoc::openapi()
+                },
+                vec![controllers::album::api_routes()],
+            ),
         )])
     }
 

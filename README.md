@@ -8,8 +8,6 @@ The Loco OpenAPI integration is generated using [`Utoipa`](https://github.com/ju
 ## `Cargo.toml`
 Edit your `Cargo.toml` file
 
-Enable feature `openapi` for `loco-rs`
-
 Add the `loco-openapi` initializer, with one or multiple of the following features flags:
 - `swagger`
 - `redoc`
@@ -19,11 +17,6 @@ Add the `loco-openapi` initializer, with one or multiple of the following featur
 ### Example
 ```toml
 # Cargo.toml
-[workspace.dependencies]
-loco-rs = { version = "*", features = [
-    "openapi",
-], git = "https://github.com/NexVeridian/loco", branch = "all_openapi" }
-
 [dependencies]
 loco-openapi = { version = "*", features = [
     "full",
@@ -59,20 +52,23 @@ use loco_openapi::prelude::*;
 
 async fn initializers(_ctx: &AppContext) -> Result<Vec<Box<dyn Initializer>>> {
     Ok(vec![Box::new(
-        loco_openapi::OpenapiInitializerWithSetup::new(|ctx| {
-            #[derive(OpenApi)]
-            #[openapi(
+        loco_openapi::OpenapiInitializerWithSetup::new(
+            |ctx| {
+                #[derive(OpenApi)]
+                #[openapi(
                     modifiers(&SecurityAddon),
                     info(
                         title = "Loco Demo",
                         description = "This app is a kitchensink for various capabilities and examples of the [Loco](https://loco.rs) project."
                     )
                 )]
-            struct ApiDoc;
-            set_jwt_location_ctx(ctx);
+                struct ApiDoc;
+                set_jwt_location_ctx(ctx);
 
-            ApiDoc::openapi()
-        }),
+                ApiDoc::openapi()
+            },
+            vec![controllers::album::api_routes()],
+        ),
     )])
 }
 ```
@@ -117,21 +113,41 @@ pub struct Album {
 ```
 
 ## Adding routes to the OpenAPI spec visualizer
-Swap the `axum::routing::MethodFilter` to `routes!`
+Create a function that returns `OpenApiRouter<AppContext>`
 
-```diff
-  Routes::new()
--     .add("/album", get(get_action_openapi)),
-+     .add("/album", routes!(get_action_openapi)),
+```rust
+use loco_openapi::prelude::*;
+
+pub fn routes() -> Routes {
+    Routes::new()
+        .prefix("api/album/")
+        .add("/get_album", get(get_album))
+}
+
+pub fn api_routes() -> OpenApiRouter<AppContext> {
+    OpenApiRouter::new().routes(routes!(get_album))
+}
+```
+
+Then in the initializer, create a `Vec<OpenApiRouter<AppContext>>`
+```rust
+async fn initializers(_ctx: &AppContext) -> Result<Vec<Box<dyn Initializer>>> {
+    Ok(vec![Box::new(
+        loco_openapi::OpenapiInitializerWithSetup::new(
+            |ctx| {
+                // ...
+            },
+            vec![controllers::album::api_routes()],
+        ),
+    )])
+}
 ```
 
 ### Note: do not add multiple routes inside the `routes!` macro
 ```rust
-Routes::new()
-    .add("/album", routes!(get_action_1_do_not_do_this, get_action_2_do_not_do_this)),
+OpenApiRouter::new()
+    .routes(routes!(get_action_1_do_not_do_this, get_action_2_do_not_do_this)),
 ```
-
-
 
 
 ### Security Documentation

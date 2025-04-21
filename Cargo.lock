@@ -2073,7 +2073,7 @@ checksum = "9374ef4228402d4b7e403e5838cb880d9ee663314b0a900d5a6aabf0c213552e"
 [[package]]
 name = "loco-gen"
 version = "0.15.0"
-source = "git+https://github.com/NexVeridian/loco?branch=all_openapi#643f967001486e5e63a4bd87e21b3d0b4e7822ae"
+source = "git+https://github.com/loco-rs/loco?rev=64d85cd26a8ab3d8b1c4fc4ab395e402f43b97a3#64d85cd26a8ab3d8b1c4fc4ab395e402f43b97a3"
 dependencies = [
  "chrono",
  "clap",
@@ -2112,7 +2112,7 @@ dependencies = [
 [[package]]
 name = "loco-rs"
 version = "0.15.0"
-source = "git+https://github.com/NexVeridian/loco?branch=all_openapi#643f967001486e5e63a4bd87e21b3d0b4e7822ae"
+source = "git+https://github.com/loco-rs/loco?rev=64d85cd26a8ab3d8b1c4fc4ab395e402f43b97a3#64d85cd26a8ab3d8b1c4fc4ab395e402f43b97a3"
 dependencies = [
  "argon2",
  "async-trait",
@@ -2165,8 +2165,6 @@ dependencies = [
  "tracing-appender",
  "tracing-subscriber",
  "ulid",
- "utoipa",
- "utoipa-axum",
  "uuid",
  "validator",
 ]
