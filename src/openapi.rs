@@ -1,44 +1,72 @@
-use std::sync::OnceLock;
+use loco_rs::app::AppContext;
+use std::sync::{Mutex, OnceLock};
+use utoipa_axum::router::{OpenApiRouter, UtoipaMethodRouter};
 
-use axum::{response::Response, routing::get, Router as AxumRouter};
-use utoipa::openapi::OpenApi;
+static OPENAPI_ROUTES: OnceLock<Mutex<Vec<OpenApiRouter<AppContext>>>> = OnceLock::new();
 
-use loco_rs::{controller::format, Result};
-
-static OPENAPI_SPEC: OnceLock<OpenApi> = OnceLock::new();
-
-pub fn set_openapi_spec(api: OpenApi) -> &'static OpenApi {
-    OPENAPI_SPEC.get_or_init(|| api)
+fn get_routes() -> &'static Mutex<Vec<OpenApiRouter<AppContext>>> {
+    OPENAPI_ROUTES.get_or_init(|| Mutex::new(Vec::new()))
 }
 
-pub fn get_openapi_spec() -> &'static OpenApi {
-    OPENAPI_SPEC.get().unwrap()
-}
-
-/// Axum handler that returns the `OpenAPI` spec as JSON
-pub async fn openapi_spec_json() -> Result<Response> {
-    format::json(get_openapi_spec())
-}
-
-/// Axum handler that returns the `OpenAPI` spec as YAML
-pub async fn openapi_spec_yaml() -> Result<Response> {
-    format::yaml(&get_openapi_spec().to_yaml()?)
-}
-
-/// Adds the `OpenAPI` endpoints the app router
-pub fn add_openapi_endpoints<T>(
-    mut app: AxumRouter<T>,
-    json_url: &Option<String>,
-    yaml_url: &Option<String>,
-) -> AxumRouter<T>
-where
-    T: Clone + Send + Sync + 'static,
-{
-    if let Some(json_url) = json_url {
-        app = app.route(json_url, get(openapi_spec_json));
+// Register a route for later merging
+pub fn add_route(route: OpenApiRouter<AppContext>) {
+    if let Ok(mut routes) = get_routes().lock() {
+        routes.push(route);
     }
-    if let Some(yaml_url) = yaml_url {
-        app = app.route(yaml_url, get(openapi_spec_yaml));
+}
+
+// Get a merged router containing all collected routes
+pub fn get_merged_router() -> OpenApiRouter<AppContext> {
+    let mut result = OpenApiRouter::new();
+
+    if let Ok(routes) = get_routes().lock() {
+        for route in routes.iter() {
+            result = result.merge(route.clone());
+        }
     }
-    app
+
+    result
+}
+
+/// Auto collect the openapi routes
+/// ```rust
+/// # use axum::debug_handler;
+/// use loco_openapi::prelude::*;
+/// # use loco_rs::prelude::*;
+/// # use serde::Serialize;
+/// # #[derive(Serialize, Debug, ToSchema)]
+/// # pub struct Album {
+/// #     title: String,
+/// #     rating: u32,
+/// # }
+/// # #[utoipa::path(
+/// #     get,
+/// #     path = "/api/album/get_album",
+/// #     tags = ["album"],
+/// #     responses(
+/// #         (status = 200, description = "Album found", body = Album),
+/// #     ),
+/// # )]
+/// # #[debug_handler]
+/// # pub async fn get_album(State(_ctx): State<AppContext>) -> Result<Response> {
+/// #     format::json(Album {
+/// #         title: "VH II".to_string(),
+/// #         rating: 10,
+/// #     })
+/// # }
+///
+/// // Swap from:
+///  Routes::new()
+///     .add("/album", get(get_album));
+/// // To:
+/// Routes::new()
+///     .add("/get_album", openapi(get(get_album), routes!(get_album)));
+/// ```
+pub fn openapi(
+    method: axum::routing::MethodRouter<AppContext>,
+    method_openapi: UtoipaMethodRouter<AppContext>,
+) -> axum::routing::MethodRouter<AppContext> {
+    let router = OpenApiRouter::new().routes(method_openapi);
+    add_route(router);
+    method
 }

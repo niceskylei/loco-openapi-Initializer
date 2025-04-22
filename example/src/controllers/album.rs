@@ -34,9 +34,5 @@ pub async fn get_album(State(_ctx): State<AppContext>) -> Result<Response> {
 pub fn routes() -> Routes {
     Routes::new()
         .prefix("api/album/")
-        .add("/get_album", get(get_album))
-}
-
-pub fn api_routes() -> OpenApiRouter<AppContext> {
-    OpenApiRouter::new().routes(routes!(get_album))
+        .add("/get_album", openapi(get(get_album), routes!(get_album)))
 }

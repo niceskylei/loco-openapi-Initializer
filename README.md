@@ -67,7 +67,7 @@ async fn initializers(_ctx: &AppContext) -> Result<Vec<Box<dyn Initializer>>> {
 
                 ApiDoc::openapi()
             },
-            vec![controllers::album::api_routes()],
+            Some(vec![controllers::album::api_routes()]),
         ),
     )])
 }
@@ -112,7 +112,18 @@ pub struct Album {
 }
 ```
 
-## Adding routes to the OpenAPI spec visualizer
+## Automatically adding routes to the OpenAPI spec visualizer
+Swap the `axum::routing::MethodRouter` to `openapi(MethodRouter<AppContext>, UtoipaMethodRouter<AppContext>) `
+
+```diff
++ use loco_openapi::prelude::*;
+
+  Routes::new()
+-     .add("/album", get(get_album)),
++     .add("/get_album", openapi(get(get_album), routes!(get_album))),
+```
+
+## Manualy adding routes to the OpenAPI spec visualizer
 Create a function that returns `OpenApiRouter<AppContext>`
 
 ```rust
@@ -131,24 +142,24 @@ pub fn api_routes() -> OpenApiRouter<AppContext> {
 
 Then in the initializer, create a `Vec<OpenApiRouter<AppContext>>`
 ```rust
+use loco_openapi::prelude::*;
+
 async fn initializers(_ctx: &AppContext) -> Result<Vec<Box<dyn Initializer>>> {
     Ok(vec![Box::new(
         loco_openapi::OpenapiInitializerWithSetup::new(
             |ctx| {
                 // ...
             },
-            vec![controllers::album::api_routes()],
+            Some(vec![controllers::album::api_routes()]),
         ),
     )])
 }
 ```
 
-### Note: do not add multiple routes inside the `routes!` macro
+## Note: do not add multiple routes inside the `routes!` macro
 ```rust
-OpenApiRouter::new()
-    .routes(routes!(get_action_1_do_not_do_this, get_action_2_do_not_do_this)),
+routes!(get_action_1_do_not_do_this, get_action_2_do_not_do_this))
 ```
-
 
 ### Security Documentation
 If `modifiers(&SecurityAddon)` is set in `inital_openapi_spec`, you can document the per route security in `utoipa::path`:

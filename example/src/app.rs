@@ -59,7 +59,7 @@ impl Hooks for App {
 
                     ApiDoc::openapi()
                 },
-                vec![controllers::album::api_routes()],
+                None,
             ),
         )])
     }

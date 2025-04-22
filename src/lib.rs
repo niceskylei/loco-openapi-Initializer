@@ -10,22 +10,26 @@ use utoipa_scalar::{Scalar, Servable as ScalarServable};
 #[cfg(feature = "swagger")]
 use utoipa_swagger_ui::SwaggerUi;
 
-use config::{get_openapi_config, set_openapi_config, OpenAPIType};
+use crate::config::{get_openapi_config, set_openapi_config, OpenAPIType};
+use crate::openapi::get_merged_router;
+use crate::utils::{add_openapi_endpoints, get_openapi_spec, set_openapi_spec};
 
 pub mod auth;
 pub mod config;
 pub mod openapi;
 pub mod prelude;
+pub mod utils;
 
-type RouterList = Vec<OpenApiRouter<AppContext>>;
+type RouterList = Option<Vec<OpenApiRouter<AppContext>>>;
 type InitialSpec = dyn Fn(&AppContext) -> OpenApi + Send + Sync + 'static;
 
 /// Loco initializer for OpenAPI with custom initial spec setup
+#[derive(Default)]
 pub struct OpenapiInitializerWithSetup {
     /// Custom setup for the initial OpenAPI spec, if any
     initial_spec: Option<Box<InitialSpec>>,
     /// Routes to add to the OpenAPI spec
-    routes_setup: Option<RouterList>,
+    routes_setup: RouterList,
 }
 
 impl OpenapiInitializerWithSetup {
@@ -37,16 +41,7 @@ impl OpenapiInitializerWithSetup {
     {
         Self {
             initial_spec: Some(Box::new(initial_spec)),
-            routes_setup: Some(routes_setup),
-        }
-    }
-}
-
-impl Default for OpenapiInitializerWithSetup {
-    fn default() -> Self {
-        Self {
-            initial_spec: None,
-            routes_setup: None,
+            routes_setup,
         }
     }
 }
@@ -67,16 +62,19 @@ impl Initializer for OpenapiInitializerWithSetup {
                 OpenApiRouter::new()
             };
 
-        // Merge all routers to be added to the OpenAPI spec
+        // Merge all manually collected routes
         if let Some(ref routes_setup) = self.routes_setup {
             for route in routes_setup {
                 api_router = api_router.merge(route.clone());
             }
         }
 
+        // Merge all automatically collected routes
+        api_router = api_router.merge(get_merged_router());
+
         // Collect the OpenAPI spec
         let (_, open_api_spec) = api_router.split_for_parts();
-        openapi::set_openapi_spec(open_api_spec);
+        set_openapi_spec(open_api_spec);
 
         let open_api_config = if let Some(open_api_config) = get_openapi_config() {
             open_api_config
@@ -92,8 +90,8 @@ impl Initializer for OpenapiInitializerWithSetup {
             spec_yaml_url,
         }) = &open_api_config.redoc
         {
-            router = router.merge(Redoc::with_url(url, openapi::get_openapi_spec().clone()));
-            router = openapi::add_openapi_endpoints(router, spec_json_url, spec_yaml_url);
+            router = router.merge(Redoc::with_url(url, get_openapi_spec().clone()));
+            router = add_openapi_endpoints(router, spec_json_url, spec_yaml_url);
         }
 
         #[cfg(feature = "scalar")]
@@ -103,8 +101,8 @@ impl Initializer for OpenapiInitializerWithSetup {
             spec_yaml_url,
         }) = &open_api_config.scalar
         {
-            router = router.merge(Scalar::with_url(url, openapi::get_openapi_spec().clone()));
-            router = openapi::add_openapi_endpoints(router, spec_json_url, spec_yaml_url);
+            router = router.merge(Scalar::with_url(url, get_openapi_spec().clone()));
+            router = add_openapi_endpoints(router, spec_json_url, spec_yaml_url);
         }
 
         #[cfg(feature = "swagger")]
@@ -114,10 +112,9 @@ impl Initializer for OpenapiInitializerWithSetup {
             spec_yaml_url,
         }) = &open_api_config.swagger
         {
-            router = router.merge(
-                SwaggerUi::new(url).url(spec_json_url.clone(), openapi::get_openapi_spec().clone()),
-            );
-            router = openapi::add_openapi_endpoints(router, &None, spec_yaml_url);
+            router = router
+                .merge(SwaggerUi::new(url).url(spec_json_url.clone(), get_openapi_spec().clone()));
+            router = add_openapi_endpoints(router, &None, spec_yaml_url);
         }
 
         Ok(router)
