@@ -1,4 +1,4 @@
-# `loco-openapi`
+# `loco-openapi-Initializer`
 This crate adds OpenAPI support to Loco by using a initializer.
 
 The Loco OpenAPI integration is generated using [`Utoipa`](https://github.com/juhaku/utoipa)
