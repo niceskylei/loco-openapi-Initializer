@@ -45,7 +45,7 @@ jobs:
         uses: Swatinem/rust-cache@v2
       - name: Run cargo clippy
         run: cargo clippy --all-features -- -D warnings -W clippy::pedantic -W clippy::nursery -W rust-2018-idioms
-        working-directory: ./loco-new
+        working-directory: ./example
           
 
   test:
@@ -65,4 +65,4 @@ jobs:
         uses: Swatinem/rust-cache@v2
       - name: Run cargo test
         run: cargo test --all-features --all 
-        working-directory: ./loco-new
+        working-directory: ./example
