@@ -1,5 +1,5 @@
 use async_trait::async_trait;
-use chrono::{Duration, offset::Local};
+use chrono::{offset::Local, Duration};
 use loco_rs::{auth::jwt, hash, prelude::*};
 use serde::{Deserialize, Serialize};
 use serde_json::Map;
@@ -27,7 +27,7 @@ pub struct RegisterParams {
 pub struct Validator {
     #[validate(length(min = 2, message = "Name must be at least 2 characters long."))]
     pub name: String,
-    #[validate(custom(function = "validation::is_valid_email"))]
+    #[validate(email(message = "invalid email"))]
     pub email: String,
 }
 

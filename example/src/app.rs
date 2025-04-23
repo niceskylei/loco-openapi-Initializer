@@ -1,15 +1,15 @@
 use async_trait::async_trait;
 use loco_openapi::prelude::*;
 use loco_rs::{
-    Result,
     app::{AppContext, Hooks, Initializer},
     bgworker::{BackgroundWorker, Queue},
-    boot::{BootResult, StartMode, create_app},
+    boot::{create_app, BootResult, StartMode},
     config::Config,
     controller::AppRoutes,
     db::{self, truncate_table},
     environment::Environment,
     task::Tasks,
+    Result,
 };
 use migration::Migrator;
 use std::path::Path;
@@ -42,7 +42,7 @@ impl Hooks for App {
         create_app::<Self, Migrator>(mode, environment, config).await
     }
 
-    async fn initializers(ctx: &AppContext) -> Result<Vec<Box<dyn Initializer>>> {
+    async fn initializers(_ctx: &AppContext) -> Result<Vec<Box<dyn Initializer>>> {
         Ok(vec![Box::new(
             loco_openapi::OpenapiInitializerWithSetup::new(
                 |ctx| {
