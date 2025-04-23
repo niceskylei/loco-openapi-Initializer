@@ -3,7 +3,7 @@
 # Application logging configuration
 logger:
   # Enable or disable logging.
-  enable: false
+  enable: true
   # Enable pretty backtrace (sets RUST_BACKTRACE=1)
   pretty_backtrace: true
   # Log level, options: trace, debug, info, warn or error.
@@ -18,6 +18,8 @@ logger:
 server:
   # Port on which the server will listen. the server binding is 0.0.0.0:{PORT}
   port: 5150
+  # Binding for the server (which interface to bind to)
+  binding: localhost
   # The UI hostname or IP address that mailers will point to.
   host: http://localhost
   # Out of the box middleware configuration. to disable middleware you can changed the `enable` field to `false` of comment the middleware block
@@ -29,13 +31,11 @@ workers:
   #   - BackgroundQueue - Workers operate asynchronously in the background, processing queued.
   #   - ForegroundBlocking - Workers operate in the foreground and block until tasks are completed.
   #   - BackgroundAsync - Workers operate asynchronously in the background, processing tasks with async capabilities.
-  mode: ForegroundBlocking
+  mode: BackgroundAsync
 
-  
 
 # Mailer Configuration.
 mailer:
-  stub: true
   # SMTP mailer configuration.
   smtp:
     # Enable/Disable smtp mailer.
@@ -49,6 +49,8 @@ mailer:
     # auth:
     #   user:
     #   password:
+    # Override the SMTP hello name (default is the machine's hostname)
+    # hello_name:
 
 # Initializers Configuration
 # initializers:
@@ -56,11 +58,23 @@ mailer:
 #    authorization_code: # Authorization code grant type
 #      - client_identifier: google # Identifier for the OAuth2 provider. Replace 'google' with your provider's name if different, must be unique within the oauth2 config.
 #        ... other fields
+initializers:
+  openapi:
+    scalar:
+      scalar:
+        url: /scalar
+    redoc:
+      redoc:
+        url: /redoc
+    swagger:
+      swagger:
+        url: /swagger
+        spec_json_url: /api-docs/openapi.json
 
 # Database Configuration
 database:
   # Database connection URI
-  uri: {{ get_env(name="DATABASE_URL", default="sqlite://loco-openapi_test.sqlite?mode=rwc") }}
+  uri: {{ get_env(name="DATABASE_URL", default="sqlite://loco-openapi_development.sqlite?mode=rwc") }}
   # When enabled, the sql query will be logged.
   enable_logging: false
   # Set the timeout duration when acquiring a connection.
@@ -74,15 +88,15 @@ database:
   # Run migration up when application loaded
   auto_migrate: true
   # Truncate database when application loaded. This is a dangerous operation, make sure that you using this flag only on dev environments or test mode
-  dangerously_truncate: true
+  dangerously_truncate: false
   # Recreating schema when application loaded.  This is a dangerous operation, make sure that you using this flag only on dev environments or test mode
-  dangerously_recreate: true
+  dangerously_recreate: false
 
 # Authentication Configuration
 auth:
   # JWT authentication
   jwt:
     # Secret key for token generation and verification
-    secret: sQAX9LCnjrp8YbKkVlgb
+    secret: bGmCQYHLRCiJ5g75TukQ
     # Token expiration time in seconds
     expiration: 604800 # 7 days

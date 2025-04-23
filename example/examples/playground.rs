@@ -1,4 +1,4 @@
-use loco_openapi::app::App;
+use loco_openapi_example::app::App;
 #[allow(unused_imports)]
 use loco_rs::{cli::playground, prelude::*};
 

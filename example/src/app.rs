@@ -1,14 +1,15 @@
 use async_trait::async_trait;
+use loco_openapi::prelude::*;
 use loco_rs::{
+    Result,
     app::{AppContext, Hooks, Initializer},
     bgworker::{BackgroundWorker, Queue},
-    boot::{create_app, BootResult, StartMode},
+    boot::{BootResult, StartMode, create_app},
     config::Config,
     controller::AppRoutes,
     db::{self, truncate_table},
     environment::Environment,
     task::Tasks,
-    Result,
 };
 use migration::Migrator;
 use std::path::Path;
@@ -42,11 +43,30 @@ impl Hooks for App {
     }
 
     async fn initializers(_ctx: &AppContext) -> Result<Vec<Box<dyn Initializer>>> {
-        Ok(vec![])
+        Ok(vec![Box::new(
+            loco_openapi::OpenapiInitializerWithSetup::new(
+                |ctx| {
+                    #[derive(OpenApi)]
+                    #[openapi(
+                        modifiers(&SecurityAddon),
+                        info(
+                            title = "Loco Demo",
+                            description = "This app is a kitchensink for various capabilities and examples of the [Loco](https://loco.rs) project."
+                        )
+                    )]
+                    struct ApiDoc;
+                    set_jwt_location_ctx(ctx);
+
+                    ApiDoc::openapi()
+                },
+                None,
+            ),
+        )])
     }
 
     fn routes(_ctx: &AppContext) -> AppRoutes {
         AppRoutes::with_default_routes() // controller routes below
+            .add_route(controllers::album::routes())
             .add_route(controllers::auth::routes())
     }
     async fn connect_workers(ctx: &AppContext, queue: &Queue) -> Result<()> {
