@@ -58,8 +58,15 @@ mailer:
 initializers:
   openapi:
     scalar:
-      url: "/scalar"
-      spec_json_url: "/openapi.json"
+      scalar:
+        url: /scalar
+    redoc:
+      redoc:
+        url: /redoc
+    swagger:
+      swagger:
+        url: /swagger
+        spec_json_url: /api-docs/openapi.json
 
 # Database Configuration
 database:
