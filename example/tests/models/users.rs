@@ -1,4 +1,4 @@
-use chrono::{offset::Local, Duration};
+use chrono::{Duration, offset::Local};
 use insta::assert_debug_snapshot;
 use loco_openapi_example::{
     app::App,
