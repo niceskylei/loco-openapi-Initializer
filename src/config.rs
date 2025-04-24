@@ -64,7 +64,7 @@ pub fn get_openapi_config() -> Option<&'static OpenAPIConfig> {
 ///       # spec_yaml_url: /api-docs/openapi.yaml
 /// ```
 #[derive(Debug, Clone, Deserialize, Serialize)]
-#[cfg_attr(test, derive(PartialEq))]
+#[cfg_attr(test, derive(PartialEq, Eq))]
 pub struct OpenAPIConfig {
     /// Redoc configuration
     /// Example:
@@ -101,7 +101,7 @@ pub struct OpenAPIConfig {
 
 /// `OpenAPI` configuration types
 #[derive(Debug, Clone, Deserialize, Serialize)]
-#[cfg_attr(test, derive(PartialEq))]
+#[cfg_attr(test, derive(PartialEq, Eq))]
 pub enum OpenAPIType {
     /// Redoc configuration
     /// Example:
