@@ -185,6 +185,6 @@ use loco_openapi::prelude::*;
 After running `cargo loco start` the OpenAPI visualizers are available at the following URLs by default:
 - http://localhost:5150/redoc
 - http://localhost:5150/scalar
-- http://localhost:5150/swagger-ui
+- http://localhost:5150/swagger
 
 To customize the OpenAPI visualizers URLs,and endpoint paths for json and yaml, see `config/*.yaml`.
