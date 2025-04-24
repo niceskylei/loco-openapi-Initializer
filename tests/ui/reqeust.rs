@@ -87,7 +87,7 @@ fn config_test() -> Config {
         "swagger".to_string(),
         json!({
             "swagger": {
-                "url": "/swagger-ui", // Ensure this matches the test URL
+                "url": "/swagger", // Ensure this matches the test URL
                 "spec_json_url": "/api-docs/openapi.json" // Required for swagger
             }
         }),
@@ -184,16 +184,15 @@ async fn test_openapi_ui_endpoints() {
 
         assert_snapshot!("scalar", res_scalar.text());
 
-        //  Test Swagger UI endpoint (kept commented as per your change)
-        // let res_swagger = rq.get("/swagger-ui").await;
-        // assert_eq!(
-        //     res_swagger.status_code(),
-        //     200,
-        //     "Expected /swagger-ui to return 200 OK: {}",
-        //     res_swagger.text().await // Added .await
-        // );
+        let res_swagger = rq.get("/swagger/").await;
+        assert_eq!(
+            res_swagger.status_code(),
+            200,
+            "Expected /swagger to return 200 OK: {}",
+            res_swagger.text()
+        );
 
-        // assert_snapshot!("swagger", res_swagger.text());
+        assert_snapshot!("swagger", res_swagger.text());
     })
     .await;
 }
