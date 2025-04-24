@@ -17,8 +17,6 @@ scalar = ["dep:utoipa-scalar"]
 
 [dependencies]
 loco-rs = { git = "https://github.com/loco-rs/loco" }
-
-
 serde = { version = "1", features = ["derive"] }
 serde_json = { version = "1" }
 async-trait = { version = "0.1" }

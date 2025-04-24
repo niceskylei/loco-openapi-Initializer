@@ -1,15 +1,15 @@
 use async_trait::async_trait;
 use loco_openapi::prelude::*;
 use loco_rs::{
-    Result,
     app::{AppContext, Hooks, Initializer},
     bgworker::{BackgroundWorker, Queue},
-    boot::{BootResult, StartMode, create_app},
+    boot::{create_app, BootResult, StartMode},
     config::Config,
     controller::AppRoutes,
     db::{self, truncate_table},
     environment::Environment,
     task::Tasks,
+    Result,
 };
 use migration::Migrator;
 use std::path::Path;
@@ -59,7 +59,7 @@ impl Hooks for App {
                                 )
                             )]
                             struct ApiDoc;
-                            set_jwt_location_ctx(ctx);
+                            set_jwt_location(ctx.into());
 
                             ApiDoc::openapi()
                         },
