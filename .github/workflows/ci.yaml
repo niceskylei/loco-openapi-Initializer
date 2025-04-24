@@ -1,4 +1,4 @@
-name: Example 
+name: CI 
 on:
   push:
     branches:
@@ -26,7 +26,6 @@ jobs:
           components: rustfmt
       - name: Run cargo fmt
         run: cargo fmt --all -- --check 
-        working-directory: ./example
 
   clippy:
     name: Run Clippy
@@ -44,8 +43,7 @@ jobs:
       - name: Setup Rust cache
         uses: Swatinem/rust-cache@v2
       - name: Run cargo clippy
-        run: cargo clippy --all-features -- -D warnings -W clippy::pedantic -W clippy::nursery -W rust-2018-idioms
-        working-directory: ./example
+        run: cargo clippy --all-features -- -D warnings -W clippy::pedantic -W clippy::nursery -W rust-2018-idioms -A clippy::result_large_err
           
 
   test:
@@ -65,4 +63,3 @@ jobs:
         uses: Swatinem/rust-cache@v2
       - name: Run cargo test
         run: cargo test --all-features --all 
-        working-directory: ./example

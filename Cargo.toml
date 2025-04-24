@@ -16,7 +16,7 @@ scalar = ["dep:utoipa-scalar"]
 
 
 [dependencies]
-loco-rs = { git = "https://github.com/loco-rs/loco", rev = "64d85cd26a8ab3d8b1c4fc4ab395e402f43b97a3" }
+loco-rs = { git = "https://github.com/loco-rs/loco" }
 
 
 serde = { version = "1", features = ["derive"] }
