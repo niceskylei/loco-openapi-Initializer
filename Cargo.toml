@@ -9,6 +9,7 @@ license = "MIT OR Apache-2.0"
 path = "src/lib.rs"
 
 [features]
+default = ["full"]
 full = ["swagger", "redoc", "scalar"]
 swagger = ["dep:utoipa-swagger-ui"]
 redoc = ["dep:utoipa-redoc"]

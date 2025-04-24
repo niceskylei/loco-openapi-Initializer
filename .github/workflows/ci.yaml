@@ -1,4 +1,4 @@
-name: CI 
+name: CI
 on:
   push:
     branches:
@@ -10,6 +10,25 @@ env:
   TOOLCHAIN_PROFILE: minimal
 
 jobs:
+  check:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout the code
+        uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: ${{ env.RUST_TOOLCHAIN }}
+      - name: Setup Rust cache
+        uses: Swatinem/rust-cache@v2
+      - uses: taiki-e/install-action@v2
+        with:
+          tool: cargo-hack
+      - run: cargo hack check --each-feature
+
   rustfmt:
     name: Check Style
     runs-on: ubuntu-latest
@@ -24,8 +43,14 @@ jobs:
         with:
           toolchain: ${{ env.RUST_TOOLCHAIN }}
           components: rustfmt
+      - name: Setup Rust cache
+        uses: Swatinem/rust-cache@v2
+      - uses: taiki-e/install-action@v2
+        with:
+          tool: cargo-hack
       - name: Run cargo fmt
-        run: cargo fmt --all -- --check 
+        run: cargo fmt --all -- --check
+        run: cargo hack fmt --each-feature --all -- --check
 
   clippy:
     name: Run Clippy
@@ -44,7 +69,6 @@ jobs:
         uses: Swatinem/rust-cache@v2
       - name: Run cargo clippy
         run: cargo clippy --all-features -- -D warnings -W clippy::pedantic -W clippy::nursery -W rust-2018-idioms -A clippy::result_large_err
-          
 
   test:
     name: Run Tests
@@ -61,5 +85,7 @@ jobs:
           toolchain: ${{ env.RUST_TOOLCHAIN }}
       - name: Setup Rust cache
         uses: Swatinem/rust-cache@v2
-      - name: Run cargo test
-        run: cargo test --all-features --all 
+      - uses: taiki-e/install-action@v2
+        with:
+          tool: cargo-hack
+      - run: cargo hack test --each-feature
