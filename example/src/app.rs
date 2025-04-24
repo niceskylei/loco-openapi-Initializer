@@ -59,7 +59,7 @@ impl Hooks for App {
                                 )
                             )]
                             struct ApiDoc;
-                            set_jwt_location_ctx(ctx);
+                            set_jwt_location(ctx.into());
 
                             ApiDoc::openapi()
                         },
