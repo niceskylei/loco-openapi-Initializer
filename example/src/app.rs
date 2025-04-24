@@ -1,15 +1,15 @@
 use async_trait::async_trait;
 use loco_openapi::prelude::*;
 use loco_rs::{
-    Result,
     app::{AppContext, Hooks, Initializer},
     bgworker::{BackgroundWorker, Queue},
-    boot::{BootResult, StartMode, create_app},
+    boot::{create_app, BootResult, StartMode},
     config::Config,
     controller::AppRoutes,
     db::{self, truncate_table},
     environment::Environment,
     task::Tasks,
+    Result,
 };
 use migration::Migrator;
 use std::path::Path;
@@ -42,26 +42,34 @@ impl Hooks for App {
         create_app::<Self, Migrator>(mode, environment, config).await
     }
 
-    async fn initializers(_ctx: &AppContext) -> Result<Vec<Box<dyn Initializer>>> {
-        Ok(vec![Box::new(
-            loco_openapi::OpenapiInitializerWithSetup::new(
-                |ctx| {
-                    #[derive(OpenApi)]
-                    #[openapi(
-                        modifiers(&SecurityAddon),
-                        info(
-                            title = "Loco Demo",
-                            description = "This app is a kitchensink for various capabilities and examples of the [Loco](https://loco.rs) project."
-                        )
-                    )]
-                    struct ApiDoc;
-                    set_jwt_location_ctx(ctx);
+    async fn initializers(ctx: &AppContext) -> Result<Vec<Box<dyn Initializer>>> {
+        let mut initializers: Vec<Box<dyn Initializer>> = vec![];
 
-                    ApiDoc::openapi()
-                },
-                None,
-            ),
-        )])
+        if ctx.environment != Environment::Test {
+            initializers.push(
+                Box::new(
+                    loco_openapi::OpenapiInitializerWithSetup::new(
+                        |ctx| {
+                            #[derive(OpenApi)]
+                            #[openapi(
+                                modifiers(&SecurityAddon),
+                                info(
+                                    title = "Loco Demo",
+                                    description = "This app is a kitchensink for various capabilities and examples of the [Loco](https://loco.rs) project."
+                                )
+                            )]
+                            struct ApiDoc;
+                            set_jwt_location_ctx(ctx);
+
+                            ApiDoc::openapi()
+                        },
+                        None,
+                    ),
+                ) as Box<dyn Initializer>
+            );
+        }
+
+        Ok(initializers)
     }
 
     fn routes(_ctx: &AppContext) -> AppRoutes {
