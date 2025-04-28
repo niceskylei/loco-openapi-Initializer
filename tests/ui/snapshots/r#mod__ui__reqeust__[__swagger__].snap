@@ -1,7 +1,6 @@
 ---
 source: tests/ui/reqeust.rs
-expression: res_swagger.text()
-snapshot_kind: text
+expression: res.text()
 ---
 <!-- HTML for static distribution bundle build -->
 <!DOCTYPE html>

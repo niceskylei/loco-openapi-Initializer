@@ -1,4 +1,5 @@
 use async_trait::async_trait;
+use loco_openapi::openapi::clear_routes;
 use loco_openapi::prelude::routes;
 use loco_openapi::{
     auth::{set_jwt_location, SecurityAddon},
@@ -13,12 +14,13 @@ use loco_rs::{
     prelude::*,
     task::Tasks,
 };
+use rstest::rstest;
 use serde::Serialize; // Added import for Album
 use serde_json::{json, Value};
 use std::collections::BTreeMap;
 use utoipa::{OpenApi, ToSchema}; // Added ToSchema
                                  // Define a minimal TestApp
-use insta::assert_snapshot;
+use insta::{assert_json_snapshot, assert_snapshot, assert_yaml_snapshot, with_settings};
 struct TestApp;
 
 // --- Start: Embedded Album Controller ---
@@ -71,7 +73,9 @@ fn config_test() -> Config {
         "redoc".to_string(),
         json!({
             "redoc": {
-                "url": "/redoc"
+                "url": "/redoc",
+                "spec_json_url": "/redoc/openapi.json",
+                "spec_yaml_url": "/redoc/openapi.yaml"
             }
         }),
     );
@@ -79,7 +83,9 @@ fn config_test() -> Config {
         "scalar".to_string(),
         json!({
             "scalar": {
-                "url": "/scalar"
+                "url": "/scalar",
+                "spec_json_url": "/scalar/openapi.json",
+                "spec_yaml_url": "/scalar/openapi.yaml"
             }
         }),
     );
@@ -88,7 +94,8 @@ fn config_test() -> Config {
         json!({
             "swagger": {
                 "url": "/swagger", // Ensure this matches the test URL
-                "spec_json_url": "/api-docs/openapi.json" // Required for swagger
+                "spec_json_url": "/swagger/openapi.json", // Required for swagger
+                "spec_yaml_url": "/swagger/openapi.yaml"
             }
         }),
     );
@@ -104,6 +111,7 @@ impl Hooks for TestApp {
     fn app_name() -> &'static str {
         "loco-openapi-test"
     }
+
     fn app_version() -> String {
         env!("CARGO_PKG_VERSION").to_string()
     }
@@ -123,8 +131,6 @@ impl Hooks for TestApp {
                     #[derive(OpenApi)]
                     #[openapi(
                         modifiers(&SecurityAddon),
-                        paths(album::get_album), // Add album path to OpenAPI spec
-                        components(schemas(album::Album)), // Add album schema
                         info(
                             title = "Loco Demo Test",
                             description = "Test OpenAPI spec for loco-openapi"
@@ -159,40 +165,63 @@ impl Hooks for TestApp {
 }
 
 // Test for OpenAPI UI Endpoints
+#[rstest]
+#[cfg_attr(
+    feature = "redoc",
+    case("/redoc"),
+    case("/redoc/openapi.json"),
+    case("/redoc/openapi.yaml")
+)]
+#[cfg_attr(
+    feature = "scalar",
+    case("/scalar"),
+    case("/scalar/openapi.json"),
+    case("/scalar/openapi.yaml")
+)]
+#[cfg_attr(
+    feature = "swagger",
+    case("/swagger/"),
+    case("/swagger/openapi.json"),
+    case("/swagger/openapi.yaml")
+)]
+#[case("")]
 #[tokio::test]
-async fn test_openapi_ui_endpoints() {
+#[serial_test::serial]
+async fn test_openapi_ui_endpoints(#[case] endpoint: &str) {
     loco_rs::testing::request::request::<TestApp, _, _>(|rq, _ctx| async move {
-        // Test Redoc endpoint
-        let res_redoc = rq.get("/redoc").await;
+        if endpoint.is_empty() {
+            return;
+        }
+        let res = rq.get(endpoint).await;
+
         assert_eq!(
-            res_redoc.status_code(),
+            res.status_code(),
             200,
-            "Expected /redoc to return 200 OK: {}",
-            res_redoc.text()
+            "Expected /{} to return 200 OK: {}",
+            endpoint,
+            res.text()
         );
 
-        assert_snapshot!("redoc", res_redoc.text());
-
-        // Test Scalar endpoint
-        let res_scalar = rq.get("/scalar").await;
-        assert_eq!(
-            res_scalar.status_code(),
-            200,
-            "Expected /scalar to return 200 OK: {}",
-            res_scalar.text()
-        );
-
-        assert_snapshot!("scalar", res_scalar.text());
-
-        let res_swagger = rq.get("/swagger/").await;
-        assert_eq!(
-            res_swagger.status_code(),
-            200,
-            "Expected /swagger to return 200 OK: {}",
-            res_swagger.text()
-        );
-
-        assert_snapshot!("swagger", res_swagger.text());
+        let content_type = res.headers().get("content-type").unwrap().to_str().unwrap();
+        match content_type {
+            "text/html" | "text/html; charset=utf-8" => {
+                with_settings!({filters => vec![
+                    (r#"("version":\s*")\d+\.\d+\.\d+"#, "$1[version]"),
+                ]}, {
+                    assert_snapshot!(format!("[{endpoint}]"), res.text());
+                });
+            }
+            "application/json" => {
+                let json_value = res.json::<serde_json::Value>();
+                assert_json_snapshot!(format!("[{endpoint}]"), json_value, {".info.version" => "[version]"});
+            }
+            "application/yaml" => {
+                let yaml_value = serde_yaml::from_str::<serde_yaml::Value>(&res.text()).unwrap();
+                assert_yaml_snapshot!(format!("[{endpoint}]"), yaml_value, {".info.version" => "[version]"});
+            }
+            _ => panic!("Invalid content type {}", content_type),
+        }
     })
     .await;
+    clear_routes();
 }
