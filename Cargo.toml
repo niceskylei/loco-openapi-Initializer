@@ -17,7 +17,7 @@ scalar = ["dep:utoipa-scalar"]
 
 
 [workspace.dependencies]
-loco-rs = { git = "ssh://git@gitlab.skysri.com/coolink-group/srv/third/loco.git", branch = "master", default-features = false }
+loco-rs = { git = "ssh://git@gitlab.skysri.com/coolink-group/srv/third/loco.git", branch = "lby", default-features = false }
 
 [dependencies]
 loco-rs = { workspace = true }
