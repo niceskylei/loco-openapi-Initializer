@@ -1,9 +1,11 @@
 [package]
-name = "loco-openapi"
+name = "by-loco-openapi"
 version = "0.1.0"
 edition = "2021"
-publish = false
+publish = true
 license = "MIT OR Apache-2.0"
+repository = "https://github.com/niceskylei/loco-openapi-Initializer"
+description = "A Loco OpenAPI Initializer"
 
 [lib]
 path = "src/lib.rs"
@@ -17,7 +19,7 @@ scalar = ["dep:utoipa-scalar"]
 
 
 [workspace.dependencies]
-loco-rs = { git = "https://github.com/niceskylei/loco.git", branch = "lby", default-features = false }
+loco-rs = {version = "0.15.0", package = "by-loco"}
 
 [dependencies]
 loco-rs = { workspace = true }
